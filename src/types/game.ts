@@ -12,7 +12,7 @@ export interface FallingEmojiProps {
   speed: number;
   position: { x: number, y: number };
   onDragStart: (emoji: string) => void;
-  onDrop: (emoji: string) => void;
+  onDrop: (emoji: string) => void;  // Changed from (id: number) => void to match implementation
 }
 
 export interface MoodConfig {

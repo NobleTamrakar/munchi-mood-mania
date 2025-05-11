@@ -137,10 +137,10 @@ export const useGameLogic = () => {
       prev.filter(e => !(e.emoji === emoji))
     );
   }, [feedMunchi]);
-
-  // Remove emoji when it falls off screen
-  const removeEmoji = useCallback((id: number) => {
-    setFallingEmojis(prev => prev.filter(emoji => emoji.id !== id));
+  
+  // Remove emoji when it falls off screen - update this to accept a string parameter
+  const removeEmoji = useCallback((emoji: string) => {
+    setFallingEmojis(prev => prev.filter(e => e.emoji !== emoji));
     missEmoji();
   }, [missEmoji]);
   

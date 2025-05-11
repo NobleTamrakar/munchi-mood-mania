@@ -19,7 +19,7 @@ const FallingEmoji = ({ id, emoji, speed, position, onDragStart, onDrop }: Falli
       
       const rect = element.getBoundingClientRect();
       if (rect.top > window.innerHeight) {
-        onDrop(emoji);
+        onDrop(emoji); // Now passing emoji string instead of id
       }
     };
     
