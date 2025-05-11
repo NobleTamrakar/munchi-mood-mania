@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Egg, Pepper, Zzz, Heart, Onion } from 'lucide-react';
+import { Egg, Heart, Flame, Moon, CloudRain } from 'lucide-react';
 
 interface TutorialOverlayProps {
   onClose: () => void;
@@ -40,12 +40,12 @@ const TutorialOverlay = ({ onClose, onSkip }: TutorialOverlayProps) => {
         </div>
         <div className="flex items-center">
           <span className="text-2xl mr-2">🌶️</span>
-          <Pepper className="text-game-red" />
+          <Flame className="text-game-red" />
           <span className="ml-2">Angry</span>
         </div>
         <div className="flex items-center">
           <span className="text-2xl mr-2">💤</span>
-          <Zzz className="text-purple-500" />
+          <Moon className="text-purple-500" />
           <span className="ml-2">Sleepy</span>
         </div>
         <div className="flex items-center">
@@ -55,7 +55,7 @@ const TutorialOverlay = ({ onClose, onSkip }: TutorialOverlayProps) => {
         </div>
         <div className="flex items-center">
           <span className="text-2xl mr-2">🧅</span>
-          <Onion className="text-blue-500" />
+          <CloudRain className="text-blue-500" />
           <span className="ml-2">Sad</span>
         </div>
       </div>,
