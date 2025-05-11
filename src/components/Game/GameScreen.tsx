@@ -7,6 +7,8 @@ import ScoreBoard from './ScoreBoard';
 import MoodTracker from './MoodTracker';
 import TutorialOverlay from './TutorialOverlay';
 import { Button } from '@/components/ui/button';
+import GameOverModal from './GameOverModal';
+import CelebrationBadge from './CelebrationBadge';
 
 const GameScreen = () => {
   const {
@@ -18,7 +20,11 @@ const GameScreen = () => {
     moodHistory,
     fallingEmojis,
     draggedEmoji,
+    highScore,
+    isNewHighScore,
+    isLevelUp,
     startGame,
+    endGame,
     handleDragStart,
     handleDrop,
     removeEmoji,
@@ -27,6 +33,9 @@ const GameScreen = () => {
   // Tutorial state
   const [showTutorial, setShowTutorial] = useState(false);
   
+  // Game Over Modal state
+  const [showGameOver, setShowGameOver] = useState(false);
+  
   // Check if this is the first visit
   useEffect(() => {
     const tutorialSeen = localStorage.getItem('moodmunch-tutorial-seen');
@@ -34,6 +43,14 @@ const GameScreen = () => {
       setShowTutorial(true);
     }
   }, [isGameActive]);
+
+  // Show Game Over modal when lives reach 0
+  useEffect(() => {
+    if (lives === 0 && isGameActive) {
+      setShowGameOver(true);
+      endGame();
+    }
+  }, [lives, isGameActive, endGame]);
   
   // Handle tutorial completion
   const handleTutorialComplete = () => {
@@ -50,14 +67,44 @@ const GameScreen = () => {
   const handleStartGameWithTutorial = () => {
     setShowTutorial(true);
   };
+  
+  // Close game over and restart
+  const handleCloseGameOver = () => {
+    setShowGameOver(false);
+  };
+  
+  // Handle manual end game
+  const handleManualEndGame = () => {
+    endGame();
+    setShowGameOver(true);
+  };
+  
+  // Handle restart game after game over
+  const handleRestartGame = () => {
+    setShowGameOver(false);
+    startGame();
+  };
 
   return (
     <div className="game-container relative">
+      {/* Celebration Badge */}
+      <CelebrationBadge isNewHighScore={isNewHighScore} isLevelUp={isLevelUp} />
+      
       {/* Tutorial overlay */}
       {showTutorial && (
         <TutorialOverlay 
           onClose={handleTutorialComplete}
           onSkip={handleTutorialSkip}
+        />
+      )}
+      
+      {/* Game Over Modal */}
+      {showGameOver && (
+        <GameOverModal
+          score={score}
+          highScore={highScore}
+          onClose={handleCloseGameOver}
+          onRestart={handleRestartGame}
         />
       )}
     
@@ -92,6 +139,16 @@ const GameScreen = () => {
           
           {/* Mood tracker */}
           <MoodTracker moodHistory={moodHistory} currentMood={mood} />
+          
+          {/* End Game Button */}
+          <div className="absolute bottom-4 right-4">
+            <Button 
+              onClick={handleManualEndGame}
+              className="bg-game-red hover:bg-game-dark-red text-white font-orbitron"
+            >
+              END GAME
+            </Button>
+          </div>
         </>
       ) : (
         /* Start screen */

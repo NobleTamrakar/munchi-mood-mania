@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { MoodType, EmojiFood } from '../types/game';
+import confetti from 'canvas-confetti';
 
 // Map of emoji to resulting mood
 const emojiEffects: Record<string, EmojiFood> = {
@@ -25,6 +26,15 @@ const emojiEffects: Record<string, EmojiFood> = {
 // Available emojis for the game
 const availableEmojis = Object.keys(emojiEffects);
 
+// Trigger confetti
+const triggerConfetti = () => {
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 }
+  });
+};
+
 export const useGameLogic = () => {
   const [isGameActive, setIsGameActive] = useState(false);
   const [score, setScore] = useState(0);
@@ -34,6 +44,12 @@ export const useGameLogic = () => {
   const [moodHistory, setMoodHistory] = useState<MoodType[]>([]);
   const [fallingEmojis, setFallingEmojis] = useState<Array<{ id: number; emoji: string; speed: number; position: { x: number, y: number } }>>([]);
   const [draggedEmoji, setDraggedEmoji] = useState<string | null>(null);
+  const [highScore, setHighScore] = useState<number>(() => {
+    return parseInt(localStorage.getItem('moodmunch-high-score') || '0', 10);
+  });
+  const [isNewHighScore, setIsNewHighScore] = useState(false);
+  const [isLevelUp, setIsLevelUp] = useState(false);
+  const [previousLevel, setPreviousLevel] = useState(1);
   
   // Start the game
   const startGame = useCallback(() => {
@@ -41,17 +57,33 @@ export const useGameLogic = () => {
     setScore(0);
     setLives(3);
     setLevel(1);
+    setPreviousLevel(1);
     setMood('neutral');
     setMoodHistory([]);
     setFallingEmojis([]);
+    setIsNewHighScore(false);
+    setIsLevelUp(false);
     toast.success("Game started! Feed Munchi!");
   }, []);
 
   // End the game
   const endGame = useCallback(() => {
     setIsGameActive(false);
-    toast.error(`Game over! Final score: ${score}`);
-  }, [score]);
+    
+    // Check if we have a new high score
+    if (score > highScore) {
+      setHighScore(score);
+      localStorage.setItem('moodmunch-high-score', score.toString());
+      setIsNewHighScore(true);
+      triggerConfetti();
+      toast.success(`New High Score: ${score}!`, {
+        duration: 5000,
+        style: { backgroundColor: '#000', border: '1px solid #39FF14', color: '#39FF14' }
+      });
+    } else {
+      toast.error(`Game over! Final score: ${score}`);
+    }
+  }, [score, highScore]);
 
   // Handle feeding Munchi with an emoji
   const feedMunchi = useCallback((emoji: string) => {
@@ -71,14 +103,36 @@ export const useGameLogic = () => {
       
       // Level up every 50 points
       if ((score + 10) % 50 === 0) {
-        setLevel(prevLevel => prevLevel + 1);
-        toast.info(`Level up! ${level + 1}`, {
+        const newLevel = Math.floor((score + 10) / 50) + 1;
+        setLevel(newLevel);
+        setPreviousLevel(level);
+        setIsLevelUp(true);
+        
+        // Trigger level up confetti
+        triggerConfetti();
+        
+        toast.info(`Level up! ${newLevel}`, {
           duration: 2000,
           style: { backgroundColor: '#000', border: '1px solid #39FF14', color: '#39FF14' }
         });
+        
+        // Reset level up flag after 3 seconds
+        setTimeout(() => {
+          setIsLevelUp(false);
+        }, 3000);
+      }
+      
+      // Check for new high score
+      if ((score + 10) > highScore && !isNewHighScore) {
+        setIsNewHighScore(true);
+        
+        // Reset high score flag after 3 seconds
+        setTimeout(() => {
+          setIsNewHighScore(false);
+        }, 3000);
       }
     }
-  }, [score, level]);
+  }, [score, level, highScore, isNewHighScore]);
   
   // Spawn a new falling emoji
   const spawnEmoji = useCallback(() => {
@@ -153,6 +207,9 @@ export const useGameLogic = () => {
     moodHistory,
     fallingEmojis,
     draggedEmoji,
+    highScore,
+    isNewHighScore,
+    isLevelUp,
     startGame,
     endGame,
     feedMunchi,
