@@ -1,9 +1,11 @@
 
 import { useGameLogic } from '../../hooks/useGameLogic';
+import { useState, useEffect } from 'react';
 import Munchi from './Munchi';
 import FallingEmoji from './FallingEmoji';
 import ScoreBoard from './ScoreBoard';
 import MoodTracker from './MoodTracker';
+import TutorialOverlay from './TutorialOverlay';
 import { Button } from '@/components/ui/button';
 
 const GameScreen = () => {
@@ -22,8 +24,43 @@ const GameScreen = () => {
     removeEmoji,
   } = useGameLogic();
 
+  // Tutorial state
+  const [showTutorial, setShowTutorial] = useState(false);
+  
+  // Check if this is the first visit
+  useEffect(() => {
+    const tutorialSeen = localStorage.getItem('moodmunch-tutorial-seen');
+    if (!tutorialSeen && !isGameActive) {
+      setShowTutorial(true);
+    }
+  }, [isGameActive]);
+  
+  // Handle tutorial completion
+  const handleTutorialComplete = () => {
+    setShowTutorial(false);
+    localStorage.setItem('moodmunch-tutorial-seen', 'true');
+  };
+  
+  // Handle tutorial skip
+  const handleTutorialSkip = () => {
+    setShowTutorial(false);
+  };
+  
+  // Start game with tutorial button
+  const handleStartGameWithTutorial = () => {
+    setShowTutorial(true);
+  };
+
   return (
     <div className="game-container relative">
+      {/* Tutorial overlay */}
+      {showTutorial && (
+        <TutorialOverlay 
+          onClose={handleTutorialComplete}
+          onSkip={handleTutorialSkip}
+        />
+      )}
+    
       {/* Game area - show only when game is active */}
       {isGameActive ? (
         <>
@@ -77,12 +114,22 @@ const GameScreen = () => {
             <p className="mt-2">How long can you keep up?</p>
           </div>
           
-          <Button 
-            onClick={startGame}
-            className="bg-transparent border-2 border-game-neon text-game-neon hover:bg-game-neon hover:text-black transition-all font-orbitron px-8 py-6 text-xl"
-          >
-            START GAME
-          </Button>
+          <div className="flex flex-col gap-4">
+            <Button 
+              onClick={startGame}
+              className="bg-transparent border-2 border-game-neon text-game-neon hover:bg-game-neon hover:text-black transition-all font-orbitron px-8 py-6 text-xl"
+            >
+              START GAME
+            </Button>
+            
+            <Button
+              onClick={handleStartGameWithTutorial}
+              variant="outline"
+              className="bg-transparent border border-gray-500 text-gray-300 hover:bg-gray-800 transition-all font-orbitron"
+            >
+              HOW TO PLAY
+            </Button>
+          </div>
           
           <div className="text-xs text-gray-500 mt-12 absolute bottom-2">
             Drag & drop emojis to Munchi. Don't let them fall!
