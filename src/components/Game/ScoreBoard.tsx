@@ -14,7 +14,11 @@ const ScoreBoard = ({ score, level, lives }: ScoreBoardProps) => {
         {Array.from({ length: 3 }).map((_, i) => (
           <Heart 
             key={i} 
-            className={`h-5 w-5 ${i < lives ? 'fill-game-red text-game-red' : 'text-gray-700'}`}  
+            className={`h-6 w-6 transition-all duration-300 ${
+              i < lives 
+                ? 'fill-red-500 text-red-500 drop-shadow-[0_0_5px_rgba(239,68,68,0.8)] animate-pulse' 
+                : 'text-gray-700 fill-gray-700/20'
+            }`}
           />
         ))}
       </div>
