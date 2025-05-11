@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { MoodType, EmojiFood } from '../types/game';
